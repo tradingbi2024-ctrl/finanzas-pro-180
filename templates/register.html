@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="card center">
+    <h2>Crear cuenta</h2>
+
+    <label>Nombre de usuario:</label>
+    <input id="reg-user" type="text">
+
+    <label>Email:</label>
+    <input id="reg-email" type="email">
+
+    <label>Contraseña (mínimo 4 caracteres, 1 letra):</label>
+    <input id="reg-pass" type="password">
+
+    <button onclick="registerUser()">Registrar</button>
+
+    <p id="reg-status" class="status"></p>
+</div>
+
+<script>
+async function registerUser() {
+    const username = document.getElementById("reg-user").value;
+    const email = document.getElementById("reg-email").value;
+    const pass = document.getElementById("reg-pass").value;
+
+    const r = await fetch("/auth/register", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({username, email, password: pass})
+    });
+
+    const res = await r.json();
+
+    if (!res.ok) {
+        document.getElementById("reg-status").textContent = res.error;
+        return;
+    }
+
+    if (res.admin) {
+        alert("Registrado como ADMIN");
+        window.location.href = "/admin";
+    } else {
+        alert("Cuenta creada, inicia sesión");
+        window.location.href = "/";
+    }
+}
+</script>
+
+{% endblock %}
