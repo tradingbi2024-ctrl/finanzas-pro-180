@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title if title else "FinanzasPro360" }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="navbar">
+    <h2>FinanzasPro360</h2>
+    {% if session.get("user_id") %}
+    <a href="/logout">Cerrar sesión</a>
+    {% endif %}
+</div>
+
+<div class="content">
+    {% block content %}{% endblock %}
+</div>
+
+<script src="/static/script.js"></script>
+</body>
+</html>
