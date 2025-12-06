@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Helvetica; }
+        h2 { text-align: center; }
+    </style>
+</head>
+<body>
+
+<h2>Informe Financiero</h2>
+
+<p>Usuario: {{ user }}</p>
+<p>Fecha de generación: {{ date }}</p>
+
+<hr>
+
+<h3>Ingresos:</h3>
+<ul>
+{% for i in ingresos %}
+    <li>{{ i.date }} - ${{ i.amount }}</li>
+{% endfor %}
+</ul>
+
+<h3>Ahorros:</h3>
+<ul>
+{% for s in savings %}
+    <li>{{ s.date }} - ${{ s.amount }}</li>
+{% endfor %}
+</ul>
+
+</body>
+</html>
