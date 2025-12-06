@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<h2>Panel financiero</h2>
+
+<div class="grid-2">
+
+    <div class="card">
+        <h3>Registrar ingreso diario</h3>
+        <input id="income-amount" type="number" placeholder="Monto">
+        <button onclick="addIncome()">Guardar</button>
+        <p id="income-status" class="status"></p>
+    </div>
+
+    <div class="card">
+        <h3>Registrar ahorro</h3>
+        <input id="saving-amount" type="number" placeholder="Monto">
+        <button onclick="addSaving()">Guardar ahorro</button>
+        <p id="saving-status" class="status"></p>
+    </div>
+
+</div>
+
+<div class="card">
+    <h3>Categorías del presupuesto mensual</h3>
+
+    <div id="cat-list"></div>
+
+    <h4>Nueva categoría:</h4>
+    <input id="cat-name" placeholder="Nombre">
+    <input id="cat-monthly" type="number" placeholder="Meta mensual">
+    <button onclick="addCategory()">Agregar categoría</button>
+</div>
+
+<div class="card">
+    <h3>Gráfico de ingresos del mes</h3>
+    <canvas id="chart-income"></canvas>
+</div>
+
+<div class="card">
+    <h3>Gráfico de ahorro</h3>
+    <canvas id="chart-saving"></canvas>
+</div>
+
+<div class="card">
+    <h3>Proyección anual</h3>
+    <canvas id="chart-year"></canvas>
+</div>
+
+{% endblock %}
