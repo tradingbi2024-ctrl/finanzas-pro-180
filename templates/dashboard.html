@@ -1,136 +1,194 @@
 {% extends "layout.html" %}
-{% block title %}Dashboard{% endblock %}
-
 {% block content %}
-<div class="grid-main">
+<div class="dashboard-page">
 
-  <!-- Categorías mensuales -->
-  <section class="card">
-    <h2>Categorías mensuales / porcentajes</h2>
-    <form id="category-form">
-      <input type="hidden" id="cat-id" />
-      <label>Nombre de la categoría
-        <input type="text" id="cat-name" placeholder="Ej: Cuota moto, Gasolina, Arriendo" />
-      </label>
-      <label>Monto meta mensual
-        <input type="number" id="cat-monthly" step="1000" />
-      </label>
-      <button type="submit">Guardar categoría</button>
-    </form>
-    <div class="status" id="cat-status"></div>
+  <!-- Verso financiero del día -->
+  <section class="top-row">
+    <div class="card verse-card">
+      <div class="verse-title">Verso financiero del día</div>
+      <div id="bible-verse-text" class="verse-text">
+        "{{ state.verse.text }}"
+      </div>
+      <div id="bible-verse-ref" class="verse-ref">
+        {{ state.verse.ref }}
+      </div>
+    </div>
+
+    <div class="card month-summary-card">
+      <h2>Resumen del mes</h2>
+      <p>Mes: {{ state.summary.year }}-{{ "%02d"|format(state.summary.month) }}</p>
+      <p>Meta ingreso mensual:
+        <strong id="summary-month-target">
+          $ {{ "{:,.0f}".format(state.summary.month_target) }}
+        </strong>
+      </p>
+      <p>Ingresos reales del mes:
+        <strong id="summary-month-income">
+          $ {{ "{:,.0f}".format(state.summary.month_income_real) }}
+        </strong>
+      </p>
+      <p>Meta ingreso diario ({{ state.summary.working_days }} días de trabajo):
+        <strong id="summary-daily-target">
+          $ {{ "{:,.0f}".format(state.summary.daily_target) }}
+        </strong>
+      </p>
+      <p>Ingreso diario real promedio:
+        <strong id="summary-avg-daily">
+          $ {{ "{:,.0f}".format(state.summary.avg_daily_real) }}
+        </strong>
+      </p>
+      <p>Proyección anual:
+        <strong id="summary-projected-year">
+          $ {{ "{:,.0f}".format(state.summary.projected_year_income) }}
+        </strong>
+      </p>
+      <p class="coach-message" id="coach-month-message">
+        {{ state.summary.month_message }}
+      </p>
+    </div>
+
+    <div class="card day-status-card">
+      <h2>Estado del día</h2>
+      <p id="coach-day-message">
+        {{ state.summary.day_message }}
+      </p>
+    </div>
   </section>
 
-  <!-- Ingreso del día -->
-  <section class="card">
-    <h2>Registrar ingreso del día</h2>
-    <form id="income-form">
-      <label>Fecha (YYYY-MM-DD)
+  <!-- Sección principal: categorías, ingresos y gráficas -->
+  <section class="middle-row">
+    <!-- Categorías -->
+    <div class="card">
+      <h2>Categorías mensuales / porcentajes</h2>
+      <div class="form-row">
+        <input
+          type="text"
+          id="category-name"
+          placeholder="Ej: Cuota moto, Gasolina, Arriendo"
+        />
+        <input
+          type="number"
+          id="category-target"
+          placeholder="Monto meta mensual"
+          min="0"
+          step="1000"
+        />
+        <button id="btn-add-category">Guardar categoría</button>
+      </div>
+      <div class="status-text" id="category-status"></div>
+    </div>
+
+    <!-- Ingreso del día -->
+    <div class="card">
+      <h2>Registrar ingreso del día</h2>
+      <div class="form-row">
         <input type="date" id="income-date" />
-      </label>
-      <label>Monto ganado hoy
-        <input type="number" id="income-amount" step="1000" />
-      </label>
-      <button type="submit">Guardar ingreso</button>
-    </form>
-    <div class="status" id="income-status"></div>
+        <input
+          type="number"
+          id="income-amount"
+          placeholder="Monto ganado hoy"
+          min="0"
+          step="1000"
+        />
+        <button id="btn-add-income">Guardar ingreso</button>
+      </div>
+      <div class="status-text" id="income-status"></div>
+    </div>
+
+    <!-- Gráfica ingreso vs meta -->
+    <div class="card">
+      <h2>Progreso de ingresos</h2>
+      <canvas id="incomeChart"></canvas>
+    </div>
   </section>
 
-  <!-- Resumen del mes -->
-  <section class="card">
-    <h2>Resumen del mes</h2>
-    <div id="summary-text" class="resumen"></div>
-    <div id="summary-status" class="diagnostico"></div>
+  <!-- Categorías configuradas -->
+  <section class="bottom-row">
+    <div class="card full-width">
+      <h2>Categorías configuradas</h2>
+      <div class="table-wrapper">
+        <table class="data-table" id="categories-table">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Meta mes</th>
+              <th>Real mes (estimado)</th>
+              <th>%</th>
+              <th>Estado</th>
+              <th>Diario sugerido</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Se llena por JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
   </section>
 
-  <!-- Tabla Categorías -->
-  <section class="card card-wide">
-    <h2>Categorías configuradas</h2>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Nombre</th>
-          <th>Meta mes</th>
-          <th>Real mes</th>
-          <th>%</th>
-          <th>Estado</th>
-          <th>Diario sugerido</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody id="categories-table-body">
-      </tbody>
-    </table>
+  <!-- Ahorro -->
+  <section class="savings-row">
+    <div class="card">
+      <h2>Metas de ahorro (máx 5)</h2>
+      <div class="form-row">
+        <input
+          type="text"
+          id="saving-name"
+          placeholder="Ej: Fondo emergencia, Moto nueva"
+        />
+        <input
+          type="number"
+          id="saving-target"
+          placeholder="Monto objetivo total"
+          min="0"
+          step="10000"
+        />
+        <input
+          type="date"
+          id="saving-deadline"
+          placeholder="Fecha límite (YYYY-MM-DD)"
+        />
+        <button id="btn-add-saving-goal">Crear meta</button>
+      </div>
+      <div class="status-text" id="saving-goal-status"></div>
+    </div>
+
+    <div class="card">
+      <h2>Registrar aporte a meta</h2>
+      <div class="form-row">
+        <select id="saving-goal-select"></select>
+        <input type="date" id="saving-deposit-date" />
+        <input
+          type="number"
+          id="saving-deposit-amount"
+          placeholder="Monto"
+          min="0"
+          step="1000"
+        />
+        <button id="btn-add-saving-deposit">Registrar aporte</button>
+      </div>
+      <div class="status-text" id="saving-deposit-status"></div>
+    </div>
+
+    <div class="card">
+      <h2>Estado de ahorro</h2>
+      <div id="saving-state-list" class="saving-state-list">
+        <!-- Se llena por JS -->
+      </div>
+    </div>
   </section>
 
-  <!-- Metas de ahorro -->
-  <section class="card">
-    <h2>Metas de ahorro (máx 5)</h2>
-    <form id="saving-goal-form">
-      <label>Nombre de la meta
-        <input type="text" id="saving-name" placeholder="Ej: Fondo emergencia, Moto nueva" />
-      </label>
-      <label>Monto objetivo total
-        <input type="number" id="saving-target" step="1000" />
-      </label>
-      <label>Fecha límite (YYYY-MM-DD)
-        <input type="date" id="saving-deadline" />
-      </label>
-      <button type="submit">Crear meta</button>
-    </form>
-
-    <h3>Registrar aporte a meta</h3>
-    <form id="saving-contrib-form">
-      <label>Meta
-        <select id="saving-select"></select>
-      </label>
-      <label>Fecha (YYYY-MM-DD)
-        <input type="date" id="saving-contrib-date" />
-      </label>
-      <label>Monto
-        <input type="number" id="saving-contrib-amount" step="1000" />
-      </label>
-      <button type="submit">Registrar aporte</button>
-    </form>
-    <div class="status" id="saving-status"></div>
+  <!-- Gráfica de ahorro -->
+  <section class="savings-chart-row">
+    <div class="card full-width">
+      <h2>Progreso de ahorro</h2>
+      <canvas id="savingChart"></canvas>
+    </div>
   </section>
-
-  <!-- Estado metas de ahorro -->
-  <section class="card card-wide">
-    <h2>Estado de ahorro</h2>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Meta</th>
-          <th>Objetivo</th>
-          <th>Ahorrado</th>
-          <th>%</th>
-          <th>Fecha límite</th>
-        </tr>
-      </thead>
-      <tbody id="saving-table-body"></tbody>
-    </table>
-  </section>
-
-  <!-- Gráfica ingresos / proyección -->
-  <section class="card card-wide">
-    <h2>Proyección mensual y anual</h2>
-    <canvas id="incomeChart" height="120"></canvas>
-  </section>
-
-  <!-- Eliminar cuenta -->
-  <section class="card card-danger">
-    <h2>Eliminar mi perfil</h2>
-    <p>Si eliminas tu perfil se borrarán todos tus registros, categorías y ahorros.</p>
-    <form method="post" action="{{ url_for('auth.delete_own_account') }}">
-      <button type="submit" class="btn-danger">Eliminar mi cuenta</button>
-    </form>
-  </section>
-
 </div>
-{% endblock %}
 
-{% block extra_js %}
-<script>
-  window.FINANZAS_STATE = {{ state|tojson }};
-</script>
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
 {% endblock %}
