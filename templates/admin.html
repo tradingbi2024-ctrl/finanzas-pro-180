@@ -1,48 +1,46 @@
 {% extends "layout.html" %}
+{% block title %}Administración{% endblock %}
+
 {% block content %}
+<div class="card card-wide">
+  <h1>Panel de administración</h1>
+  <p>Solo puedes eliminar usuarios. No puedes ver sus datos internos.</p>
 
-<h2>Panel de administrador</h2>
-
-<div class="card">
-    <h3>Usuarios registrados</h3>
-    <table class="users-table">
-        <thead>
-            <tr>
-                <th>ID</th><th>Usuario</th><th>Email</th>
-                <th>Último acceso</th><th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody id="admin-users"></tbody>
-    </table>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Correo</th>
+        <th>Admin</th>
+        <th>Creado</th>
+        <th>Último ingreso</th>
+        <th>Última actividad</th>
+        <th>Acción</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td>{{ u.id }}</td>
+        <td>{{ u.name }}</td>
+        <td>{{ u.email }}</td>
+        <td>{{ 'Sí' if u.is_admin else 'No' }}</td>
+        <td>{{ u.created_at.strftime('%Y-%m-%d') if u.created_at else '' }}</td>
+        <td>{{ u.last_login_at.strftime('%Y-%m-%d') if u.last_login_at else '' }}</td>
+        <td>{{ u.last_active_at.strftime('%Y-%m-%d') if u.last_active_at else '' }}</td>
+        <td>
+          {% if not u.is_admin %}
+          <form method="post" action="{{ url_for('auth.admin_delete_user', user_id=u.id) }}">
+            <button type="submit" class="btn-danger">Eliminar</button>
+          </form>
+          {% else %}
+          -
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
-
-<script>
-async function loadUsers() {
-    const r = await fetch("/admin/list");
-    const data = await r.json();
-    const tbody = document.getElementById("admin-users");
-    tbody.innerHTML = "";
-
-    data.users.forEach(u => {
-        tbody.innerHTML += `
-            <tr>
-                <td>${u.id}</td>
-                <td>${u.username}</td>
-                <td>${u.email}</td>
-                <td>${u.last_login}</td>
-                <td><button onclick="delUser(${u.id})">Eliminar</button></td>
-            </tr>`;
-    });
-}
-
-async function delUser(id) {
-    if(!confirm("¿Eliminar este usuario?")) return;
-
-    await fetch("/admin/delete/" + id, {method:"DELETE"});
-    loadUsers();
-}
-
-loadUsers();
-</script>
-
 {% endblock %}
