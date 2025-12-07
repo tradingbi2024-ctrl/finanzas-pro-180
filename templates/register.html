@@ -1,50 +1,26 @@
 {% extends "layout.html" %}
+{% block title %}Registrarse{% endblock %}
+
 {% block content %}
-
-<div class="card center">
-    <h2>Crear cuenta</h2>
-
-    <label>Nombre de usuario:</label>
-    <input id="reg-user" type="text">
-
-    <label>Email:</label>
-    <input id="reg-email" type="email">
-
-    <label>Contraseña (mínimo 4 caracteres, 1 letra):</label>
-    <input id="reg-pass" type="password">
-
-    <button onclick="registerUser()">Registrar</button>
-
-    <p id="reg-status" class="status"></p>
+<div class="auth-wrapper">
+  <div class="card auth-card">
+    <h1>Crear cuenta</h1>
+    <form method="post">
+      <label>Nombre completo
+        <input type="text" name="name" required />
+      </label>
+      <label>Correo electrónico
+        <input type="email" name="email" required />
+      </label>
+      <label>Contraseña
+        <input type="password" name="password" required minlength="4" />
+      </label>
+      <button type="submit">Registrarme</button>
+    </form>
+    <p class="auth-link">
+      ¿Ya tienes cuenta?
+      <a href="{{ url_for('auth.login') }}">Iniciar sesión</a>
+    </p>
+  </div>
 </div>
-
-<script>
-async function registerUser() {
-    const username = document.getElementById("reg-user").value;
-    const email = document.getElementById("reg-email").value;
-    const pass = document.getElementById("reg-pass").value;
-
-    const r = await fetch("/auth/register", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({username, email, password: pass})
-    });
-
-    const res = await r.json();
-
-    if (!res.ok) {
-        document.getElementById("reg-status").textContent = res.error;
-        return;
-    }
-
-    if (res.admin) {
-        alert("Registrado como ADMIN");
-        window.location.href = "/admin";
-    } else {
-        alert("Cuenta creada, inicia sesión");
-        window.location.href = "/";
-    }
-}
-</script>
-
 {% endblock %}
