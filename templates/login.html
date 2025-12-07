@@ -1,46 +1,23 @@
 {% extends "layout.html" %}
+{% block title %}Iniciar sesión{% endblock %}
+
 {% block content %}
-
-<div class="card center">
-    <h2>Iniciar sesión</h2>
-
-    <label>Email:</label>
-    <input id="login-email" type="email">
-
-    <label>Contraseña:</label>
-    <input id="login-pass" type="password">
-
-    <button onclick="login()">Ingresar</button>
-
-    <p>¿No tienes cuenta? <a href="#" onclick="showRegister()">Crear cuenta</a></p>
-    <p id="login-status" class="status"></p>
+<div class="auth-wrapper">
+  <div class="card auth-card">
+    <h1>Iniciar sesión</h1>
+    <form method="post">
+      <label>Correo electrónico
+        <input type="email" name="email" required />
+      </label>
+      <label>Contraseña
+        <input type="password" name="password" required />
+      </label>
+      <button type="submit">Entrar</button>
+    </form>
+    <p class="auth-link">
+      ¿No tienes cuenta?
+      <a href="{{ url_for('auth.register') }}">Crear cuenta</a>
+    </p>
+  </div>
 </div>
-
-<script>
-function showRegister() {
-    window.location.href = "/register_page";
-}
-
-async function login() {
-    const email = document.getElementById("login-email").value;
-    const pass = document.getElementById("login-pass").value;
-
-    const r = await fetch("/auth/login", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({email: email, password: pass})
-    });
-
-    const res = await r.json();
-
-    if (!res.ok) {
-        document.getElementById("login-status").textContent = res.error;
-        return;
-    }
-
-    if (res.is_admin) window.location.href = "/admin";
-    else window.location.href = "/";
-}
-</script>
-
 {% endblock %}
